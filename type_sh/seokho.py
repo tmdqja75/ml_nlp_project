@@ -145,7 +145,6 @@ def getModel(df):
 
   e = LabelEncoder()
   y = e.fit_transform(df['극성'])
-  print(y)
 
   X_train, X_test, y_train, y_test = train_test_split(X,
                                                       y,

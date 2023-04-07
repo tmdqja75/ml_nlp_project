@@ -1,6 +1,16 @@
-def apply_re(text):
-    import re
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import StratifiedKFold
+import pandas as pd
+import re
+from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import TfidfVectorizer
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import pickle
 
+
+def apply_re(text):
     text = text.replace('.', ' ')
     hangul = re.compile('[^ ㄱ-ㅣ 가-힣]')
     result = hangul.sub('', text)
@@ -11,10 +21,6 @@ def last_two_word(sentence):
     return result[0] + ' ' + result[1]
 
 def data_preprocessing(raw_data):
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    import pandas as pd
-
     raw_data_cer_sample = raw_data[raw_data["확실성"] == "확실"].sample(3000, random_state=13)
     raw_data_un_sample = raw_data[raw_data["확실성"] == "불확실"]
     raw_data_sample = pd.concat([raw_data_cer_sample, raw_data_un_sample])
@@ -29,18 +35,12 @@ def data_preprocessing(raw_data):
     return X, y, vectorizer
 
 def data_split(X, y):
-    from sklearn.model_selection import train_test_split
 
     X_train,X_test,y_train,y_test = train_test_split(X,y,stratify=y,random_state=13)
 
     return X_train, X_test, y_train, y_test
 
 def fit_model(raw_data):
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.model_selection import GridSearchCV
-    from sklearn.model_selection import StratifiedKFold
-    import pandas as pd
-
     X, y, vectorizer = data_preprocessing(raw_data)
     X_train, X_test, y_train, y_test = data_split(X, y)
 
@@ -51,6 +51,9 @@ def fit_model(raw_data):
     grid = GridSearchCV(lr, params,scoring='roc_auc' , cv=skfold)
 
     grid.fit(X_train, y_train)
+
+    pickle.dump(grid.best_estimator_, open('./type_hy/hy_model.pkl', 'wb'))
+    pickle.dump(vectorizer, open('./type_hy/hy_vectorizer.pkl', 'wb'))
 
     return vectorizer, grid.best_estimator_
 
@@ -65,13 +68,22 @@ def predict(sentence, vectorizer, model):
     elif predict_answer == 1:
         return "확실"
 
-'''
-import sentence_classify as cls
-import pandas as pd
 
-raw_data = pd.read_csv('../ML_project/data/train.csv')
+# import sentence_classify as cls
+# import pandas as pd
+
+raw_data = pd.read_csv('./train.csv')
 
 sentence = '내 삶은 아직 끝나지 않을 예정이다.'
-vectorizer, model = cls.fit_model(raw_data)
-cls.predict(sentence, vectorizer, model)
-'''
+vectorizer, model = fit_model(raw_data)
+
+model = pickle.load(open('./type_hy/hy_model.pkl', 'rb'))
+vectorizer = pickle.load(open('./type_hy/hy_vectorizer.pkl', 'rb'))
+
+sentence_pre = apply_re(last_two_word(sentence))
+sentence_vec = vectorizer.transform([sentence_pre])
+result_classify = model.predict(sentence_vec)
+print(result_classify)
+# cls.predict(sentence, vectorizer, model)
+
+# fit_model('train.csv')

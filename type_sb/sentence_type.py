@@ -1,8 +1,7 @@
-import numpy as np
 import re
 
+import numpy as np
 from joblib import load
-
 from konlpy.tag import Mecab
 
 STOPWORDS = ['은', '는', '도', '한', '이다', '을', '이', '를', '가', '에', '의', '과', '에서', '으로', '들', '로', '와', '등']
@@ -21,8 +20,8 @@ def regex_filter(sentence):
     return re.sub(r"[^가-힣\s!?]|\(.*?\)", "", sentence)
 
 def type_ml_model(sent):
-    vectorizer = load('final_vectorizer.joblib')
-    model = load('final_model.joblib')
+    vectorizer = load('./type_sb/final_vectorizer.joblib')
+    model = load('./type_sb/final_model.joblib')
 
     sent_regex_filter = regex_filter(sent)
     sent_tfidf = vectorizer.transform([sent_regex_filter])

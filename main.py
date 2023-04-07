@@ -17,7 +17,7 @@ import pandas as pd
 import type_sh.seokho as po
 import type_sb.sentence_type as sent_type
 import tense_yeram.fin_tense as fin
-import sentence_classify as cls
+import type_hw.sentence_classify as cls
 import pandas as pd
 
 new_sentence = []

@@ -233,7 +233,6 @@ def main():
         # Now, put the transcription responses to use.
         listen_print_loop(responses)  # return new_sentence
 
-    new_sentence = '안녕하세요, 승범님!'
     type_pred, po_pred, tense_pred, cls_pred = nlp_project(new_sentence)
 
     print("문장: ", new_sentence)
